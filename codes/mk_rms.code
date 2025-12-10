@@ -1,0 +1,27 @@
+\begin{algorithm}%[H]
+  \caption{(m,k)-Firm RMS}
+  \label{alg:mk_rms}
+  \begin{algorithmic}[1]
+    \REQUIRE List \textit{ready\_list} of ready jobs (initially empty)
+    \STATE \textbf{Schedule$(cpu)$:}
+    \STATE decision $\gets$ \textbf{null}
+    \IF{ready\_list is not empty}
+      \STATE select $job \in$ ready\_list with minimal $(job.optional,\; job.period)$
+      \STATE /* mandatory jobs first, then shorter period (RMS priority) */
+      \STATE current $\gets cpu.\text{running}$
+
+      \IF{(current $=$ \textbf{null}) \textbf{ or } (current.period $>$ job.period)}
+        \STATE /* do not let an optional job preempt a mandatory one */
+        \IF{\textbf{not} (current $\neq$ \textbf{null} \textbf{ and } current.mandatory \textbf{ and } job.optional)}
+          \STATE remove $job$ from ready\_list
+          \IF{current $\neq$ \textbf{null}}
+            \STATE append current to ready\_list  /* preempted job goes back to the queue */
+          \ENDIF
+          \STATE decision $\gets (job,\; cpu)$
+          \STATE /* optionally: print current time, job name, and cpu name */
+        \ENDIF
+      \ENDIF
+    \ENDIF
+    \STATE \textbf{return} decision
+  \end{algorithmic}
+\end{algorithm}

@@ -1,0 +1,43 @@
+\section{Evaluation}
+
+\subsection{Experiments and Results}\label{subsec:experiments-and-results}
+For running our experiments, we run all simulations for 60,000 ms. For task set 1, a total of 32,071 jobs are run within the 60,000 ms; for task set 2, a total of 14,670 jobs are run within the 60,000 ms; for task set 3, a total of 14,583 jobs are run within the 60,000 ms. In the three figures below, we will analyze the preemption rate, deadline miss ratio, and (m,k) satisfaction fraction of all three (m,k)-firm algorithms, EDF (as baseline), and RMS (as an additional reference) for all three task sets.
+
+\subsubsection{Preemption Rate}
+Figure \ref{fig:preemption-rate-vs-algo} shows the preemption rate of each algorithm for all 3 task sets. Preemption rate is defined as the total preemption events divided by the total number of jobs. Analysis of this metric is important because this is one of the largest factor into measuring context switching overhead. A 0 preemption rate doesn't imply 0 context switching overhead, but a high preemption rate does imply higher context switching overhead. Hence, we study this metric as part of our evaluation into an algorithm's efficiency.
+
+\import{images/}{preemption_rate_fig.tex}
+
+From the figure, one can easily see that the higher the CPU usage, the higher the preemption rate. For task set 2, where CPU usage is 111.7\%, we can see that (m,k)-firm DBP has the lowest preemption rate. This is because of the ``look ahead'' property of the algorithm. For every scheduling event, the algorithm essentially look ahead and schedule tasks based on the worst case prediction, deadline miss, of the next instance of the job. This property of the algorithm helped improved its preemption rate when compared to other algorithms.
+
+However, in task set 3, we can see that the preemption rate is lower than task set 2, and in EDF's case, the metric is lower than task set 1. This is because, as we will discuss later, the deadline miss ratio for task set 3 is way more significant than the other two task sets. Hence, since many tasks (sometimes up to 50.1\%) of the jobs are missed, the preemption rate naturally goes down.
+
+\subsubsection{Deadline Miss Ratio}
+Figure \ref{fig:deadlinemiss-vs-algo} shows the deadline miss ratio of each algorithm for all 3 task sets. Deadline miss ratio is defined as the total of missed jobs over the total number of jobs. This is one of the most cared about metrics of a scheduling algorithm. And as we can see, not surprisingly, the higher the CPU usage, the higher the miss ratio, for any algorithm.
+
+\import{images/}{deadlinemiss_ratio.tex}
+
+However, rather surprisingly, we can see that the three (m,k)-firm algorithms have a greater than 0 deadline miss ratio even with task set 1 where the CPU usage is < 100\%. Intuitively, this makes sense, as some jobs marked as optional might get prioritized over lower priority yet mandatory tasks.
+
+Moreover, we can see that for any task set, (m,k)-firm DBP does not perform better in terms of deadline miss ratio. And that (m,k)-firm EDF perform the best when the system is slightly overloaded in task set 2, and RMS perform the best when the system is super-overloaded in task set 3. This led Li and Tan to propose an improved DBP, the Total Distance Based Priority (TDBP) \cite{Lanying-better-DBP}.
+
+\subsubsection{(m,k) Window Satisfaction Fraction}
+Figure \ref{fig:mk-satis-frac-vs-algo} shows the (m,k) satisfaction fraction of each algorithm for all 3 task sets. (m,k) satisfaction fraction is defined as the number of (m,k) satisfied window divided by the total (m,k) window. For this metric, the closer to 1.000 the better.
+
+\import{images/}{mk_satis_frac.tex}
+
+We can see that, again, the higher the CPU usage, the lower the value is, but in all cases, the three (m,k)-firm algorithms have the highest satisfaction fraction out of all 5 algorithms. With EDF having the lowest satisfaction fraction for task set 3.
+
+This result is hardly surprising. (m,k)-firm algorithms are designed to satisfy (m,k)-firm requirements. Hence, the better performance. However, when considering the extra overhead to implement (m,k)-firm algorithms, compared to RMS, and even EDF, the decision of which algorithm to choose becomes harder. This is because, as you can see, the difference between the (m,k) satisfaction fraction of 0.682 for RMS and 0.742 for (m,k)-firm RMS isn't significant enough in many cases to justify the additional overhead.
+
+\subsection{Tradeoff Analysis}\label{subsec:tradeoff-analysis}
+
+For a normal load, with tasks with (m,k) properties, and less than 100\% CPU usage, like task set 1, RMS and EDF both are comparatively better than the three (m,k)-firm algorithms in terms of deadline miss ratio. Furthermore, the preemption rate of RMS and EDF are only slightly higher than the three (m,k)-firm algorithms. From our experiments, there is no difference between the 5 algorithms in terms of (m,k) satisfaction fraction.
+
+Hence, for this kind of load, given the $13\times$, and $4.5\times$ difference in overhead for (m,k)-firm RMS and EDF, and (m,k)-firm DBP, respectively, there is no reason to favor a (m,k)-firm algorithm over RMS or EDF.
+
+Moving on, for a load like task set 2, which is slightly overloaded and have tasks with (m,k) properties, all algorithms perform similarly in terms of preemption rate, although (m,k)-firm DBP is slightly better. In terms of deadline miss ratio, again, all algorithms perform similarly, although we noticed that (m,k)-firm algorithms have slightly lower deadline miss ratio compared to RMS, and EDF. Finally, in terms of (m,k) satisfaction fraction, not surprisingly (m,k)-firm algorithms perform significantly better than RMS and EDF.
+
+Therefore, for this kind of load, given the superior performance in (m,k) satisfaction fraction of the three (m,k)-firm algorithms, if the extra overhead is tolerable, it might be worth using one of them. Specifically, we think (m,k)-firm DBP is a good balance between extra overhead of $4.5\times$, and performance. If extra overhead is tolerable. If not, EDF offers slightly better performance for preemption rate and (m,k) satisfaction fraction over RMS.
+
+Finally, for a load like task set 3, which is super-overloaded and have tasks with (m,k) properties, RMS is actually the best algorithms for deadline miss ratio. So, if deadline miss ratio is a very important metric for one's system, RMS is the best option. Even in preemption rate and, unintuitively, (m,k) satisfaction fraction, one might want to opt for EDF over any of the three (m,k)-firm algorithms. In both metrics, EDF has significantly better performance than the three (m,k)-firm algorithms, at a faction of the overhead cost.

@@ -1,0 +1,59 @@
+\begin{figure}%[H]
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            ybar,
+            title={Plot of (m,k) satisfaction fraction vs algorithm},
+            xlabel={Algorithm},
+            ylabel={(m,k) satisfaction fraction},
+            ymin=0.4,
+            enlarge y limits={upper, value=0.2},
+            grid=major,
+            symbolic x coords={RMS, EDF (baseline), MK\_RMS, MK\_EDF, MK\_DBP},
+            xtick=data,
+            bar width=8pt,
+            enlarge x limits=0.15,
+            xticklabel style={
+                font=\footnotesize,
+                rotate=45,
+                anchor=east,
+            },
+            legend style={
+                at={(0.97,0.97)},
+                anchor=north east,
+                legend columns=-1
+            },
+        ]
+
+        % color1!30!color2, means 30% color1 70% color2
+        \addplot+[fill=purple!30!white, draw=black] table [col sep=comma, x=Algorithm, y=prate] {
+            Algorithm,prate
+            RMS,1.0
+            EDF (baseline),1.0
+            MK\_RMS,1.0
+            MK\_EDF,1.0
+            MK\_DBP,1.0
+        };\addlegendentry{Task set 1}
+
+        \addplot+[fill=blue!30!white, draw=black] table [col sep=comma, x=Algorithm, y=prate] {
+            Algorithm,prate
+            RMS,0.790
+            EDF (baseline),0.919
+            MK\_RMS,0.988
+            MK\_EDF,1.0
+            MK\_DBP,1.0
+        };\addlegendentry{Task set 2}
+
+        \addplot+[fill=green!30!white, draw=black] table [col sep=comma, x=Algorithm, y=prate] {
+            Algorithm,prate
+            RMS,0.682
+            EDF (baseline),0.489
+            MK\_RMS,0.742
+            MK\_EDF,0.698
+            MK\_DBP,0.689
+        };\addlegendentry{Task set 3}
+        \end{axis}
+    \end{tikzpicture}
+    \caption{Plot of (m,k) satisfaction fraction vs algorithm}
+    \label{fig:mk-satis-frac-vs-algo}
+\end{figure}

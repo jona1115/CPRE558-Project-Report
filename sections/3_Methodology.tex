@@ -1,0 +1,84 @@
+
+
+\section{Methodology}\label{sec:methodology}
+To adequately study the tradeoffs between different algorithms for (m,k)-firm tasks, we will study in detail three algorithms, (m,k)-firm RMS, (m,k)-firm EDF, and (m,k)-firm DBP.
+
+\subsection{Algorithms}\label{subsec:algorithms}
+\subsubsection{RMS and EDF}
+Basic vanilla EDF is used for the baseline. Basic vanilla RMS is used for additional comparison. They are implemented as defined in lecture.
+
+In an actual implementation, the scheduler will keep track of the highest priority job, as well as a list of ready jobs. Therefore, scheduling of the next job is atomic. Complexity of the min or max function can be $O(1)$. For the sake of argument, in this paper, we summarize the overhead of RMS and EDF as $1x$ computation time.
+
+\subsubsection{(m,k)-firm RMS}
+Implementation of (m,k)-firm RMS algorithm is based on homework 3 question C's 2(b). As per the specification given in the assignment, (m,k)-firm RMS ``classified instances of a task into mandatory or optional, and assigns priority to mandatory instances as per RMS, and assigns the lowest priority to optional instances''~\cite{homework3}.
+
+As per mentioned in lecture, mandatory and optional are determined as per formula described in class. For given instance number $a$, using the below formula, if
+\begin{align}
+    a==\left\lfloor\left\lceil\frac{a\cdot m}{k}\right\rceil\cdot\frac{k}{m}\right\rfloor \label{eq:mo}
+\end{align}
+the task is deemed to be mandatory (M), else, it is optional (O).
+
+One implementation divergence from the homework question's specification in the pattern of M and O for tasks that have the same $m_i$ and $k_i$ values. In the homework question's specification, if tasks share the same $m_i$ and $k_i$ values, pattern are circular shifted right, e.g. MMO and OMM. However, this specification is not implemented for simplicity. In the implementation, if tasks share the same $m_i$ and $k_i$ values, M and O assignment pattern will be the same for those tasks. This simplification preserves the per-task (m,k) requirements while easing implementation complexity.
+
+The order of assigning priority is as follows: During a scheduling event, priority is assigned first based on RMS, on a tie, priority is given to reduce context switching, if a tie remains, an arbitrary task is given CPU access.
+
+Optional tasks cannot preempt mandatory tasks, however, mandatory tasks can preempt optional task. Optional tasks can preempt optional tasks, and mandatory tasks can preempt mandatory task.
+
+Algorithm \ref{alg:mk_rms} shows the pseudocode of this (m,k)-firm RMS algorithm.
+
+\import{codes/}{mk_rms.code}
+
+\subsubsection{(m,k)-firm EDF}
+Implementation of (m,k)-firm EDF algorithm is similar to implementation of (m,k)-firm EDF described above, except that the base algorithm is EDF, instead of RMS.
+
+The order of assigning priority is similar to (m,k)-firm RMS, only difference is the base algorithm is EDF.
+
+\subsubsection{(m,k)-firm DBP}
+Implementation of (m,k)-firm DBP algorithm is based on Goossens' 2008 paper~\cite{goossens:inria-00336461}. However, we want to note that the idea is originally published by Hamsaoui and Ramanathan in \cite{mkdbp-og}.
+
+The main idea is to assign priority based on ``distance''. Distance is an estimation of how many future misses remain before a task violate its (m,k) requirement. The algorithm then assigns priority based on distance, the smaller distance the more urgent, hence, the higher the priority.
+
+The order of assigning priority is as follows: Just like (m,k)-firm RMS and EDF, optional tasks cannot preempt mandatory tasks, however, mandatory tasks can preempt optional task. Optional tasks can preempt optional tasks, and mandatory tasks can preempt mandatory task. During a scheduling event, priority is assigned first based on distance, on a tie, EDF is used, if a tie remains, RMS is used.
+
+Algorithm \ref{alg:mk_dbp} shows the pseudocode of this (m,k)-firm RMS algorithm.
+
+\import{codes/}{mk_dbp.code}
+
+\subsection{Algorithms Overhead Analysis}
+Table \ref{tab:esoverhead} shows a quick overview of each algorithm's estimated overhead. For simplicity, we defined $x$ as a comparison function or min/max functions; we defined $y$ as multiplication and division operation, regardless of data types; we defined $z$ as array operations, for example, read, write, pop, push, etc.
+
+Using the ARM Cortex-M4 as example \cite{ARM-Cortex-M4}, the compare instruction \texttt{CMP} is 1 cycle, and a conditional branch is $\approx$ 1 cycle, hence, $x=2$ (cycles). Multiplication instruction \texttt{MUL} is 6 cycles, and division instruction varies according to the value, for simplicity, we say $y=6$ (cycles). Finally, array operation, i.e. memory operation $z=3$ (cycles) because a load instruction \texttt{LDR} is $\approx$ 2 cycles, and the store instruction \texttt{STR} is $\approx$ 3 cycles.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|>{\raggedright\arraybackslash}p{0.28\linewidth}|>{\raggedright\arraybackslash}p{0.17\linewidth}|>{\raggedright\arraybackslash}p{0.35\linewidth}|}
+        \hline
+        Algorithm & Estimated Overhead & Est. Overhead on Cortex-M4 (cycles) \\
+        \hline
+        RMS and EDF & $1x$ & 2 \\
+        (m,k)-firm RMS & $1x+4y$ & 26 \\
+        (m,k)-firm EDF & $1x+4y$ & 26 \\
+        (m,k)-firm DBP & $3x+1z$ & 9 \\
+        \hline
+    \end{tabular}
+    \caption{Estimated Overhead of Each Algorithm}
+    \label{tab:esoverhead}
+\end{table}
+
+In the subsections below, we will discuss how each estimated overhead is derived:
+
+\subsubsection{RMS and EDF}
+In an actual implementation, the scheduler will keep track of the highest priority job, as well as a list of ready jobs. Therefore, scheduling of the next job is atomic. Complexity of the min or max function can be $O(1)$. For the sake of argument, in this paper, we summarize the overhead of RMS and EDF as $1x$ computation time.
+
+\subsubsection{(m,k)-firm RMS}
+In an actual implementation, all jobs first have to be determined as mandatory or optional using equation \ref{eq:mo}. There are 4 mul/div operation in that formula. However, this overhead is not incurred in every scheduling event, but only when a job is ready or when it is added to the ready queue. For the sake of argument, in this paper, we assume mult and div operation compute in $y$ time. Therefore, we summarize this scheduler's overhead as $1x+4y$ computation time. The $1x$ comes from a min function, same reason RMS and EDF are $1x$ computation time.
+
+\subsubsection{(m,k)-firm EDF}
+The computation time for (m,k)-firm EDF is the same as (m,k)-firm RMS, which is $1x+4y$.
+
+\subsubsection{(m,k)-firm DBP}
+In terms of computation time for (m,k)-firm DBP, estimating this becomes complicated. For simplicity, we assume any array operation, e.g. read, write, pop, append, etc, compute in $1z$ time. The function \textsc{Distance}$(i)$ have one of those operation in line \ref{algline:concat}. Then, the function also has prefix-sum function, in line \ref{algline:len} and line \ref{algline:sum}. We assume that they are implemented efficiently and assuming k is small and bounded, we can approximate the $O(1)$ runtime. Hence, together, they are approximately $2x$ computation time. Assuming all other operation are 0 computation time, the total computation overhead of this algorithm is then $1z+2x+1x=3x+1z$, note the $1x$ is incurred during the \textsc{Priority}$(J)$ function, similar to how RMS, EDF, and (m,k)-firm RMS and EDF incurred their $1x$.
+
+
+% \subsection{Illustrative Example}
+% \hl{wtf do you want?}

@@ -1,0 +1,52 @@
+\begin{algorithm}%[H]
+  \caption{(m,k)-Firm DBP-EDF}
+  \label{alg:mk_dbp}
+  \begin{algorithmic}[1]
+    \STATE \textbf{Data:} ready list $R$, history $H[i]$ for each task $i$
+
+    \STATE
+    \STATE \textbf{function} \textsc{Distance}$(i)$
+    \STATE \quad $m \gets i.m$; $seq \gets$ list($H[i]$); $k \gets len(seq)$ \label{algline:len}
+    \STATE \quad \textbf{if} $m \le 0$ \textbf{then return} $+\infty$
+    \STATE \quad \textbf{if} $\sum seq < m$ \textbf{then return} $0$
+    \STATE \quad $d \gets 0$
+    \STATE \quad \textbf{while} $d < k$ \textbf{do}
+    \STATE \qquad $seq \gets$ tail$(seq)$ concatenated with $0$ \label{algline:concat}
+    \STATE \qquad \textbf{if} $\sum seq < m$ \textbf{then return} $d-1$ \label{algline:sum}
+    \STATE \qquad $d$++
+    \STATE \quad \textbf{end while}
+    \STATE \quad \textbf{return} $d$
+    \STATE \textbf{end function}
+
+    \STATE
+    \STATE \textbf{function} \textsc{Priority}$(J)$
+    \STATE \quad \textbf{return} $\big(J.\textit{optional},$
+    \STATE \quad\quad\quad\quad\quad $\textsc{Distance}(J.\textit{task}),$
+    \STATE \quad\quad\quad\quad\quad $J.\textit{absolute\_deadline},$
+    \STATE \quad\quad\quad\quad\quad $J.\textit{period}\big)$
+    \STATE \textbf{end function}
+
+    \STATE
+    \STATE \textbf{function} \textsc{ShouldRun}$(cand, current)$
+    \STATE \quad \textbf{if} $current = \textbf{null}$ \textbf{then return} true
+    \STATE \quad \textbf{if} $current.\textit{mandatory} \wedge cand.\textit{optional}$ \textbf{then return} false
+    \STATE \quad \textbf{return} \textsc{Priority}$(cand) < \textsc{Priority}(current)$
+    \STATE \textbf{end function}
+
+    \STATE
+    \STATE \textbf{procedure} \textsc{Schedule}$(cpu)$
+    \STATE \quad \textbf{if} $R$ is empty \textbf{then return} \textbf{null}
+    \STATE \quad $job \gets \arg\min_{J \in R} \textsc{Priority}(J)$
+    \STATE \quad $current \gets cpu.\textit{running}$
+    \STATE \quad \textbf{if} \textsc{ShouldRun}$(job, current)$ \textbf{then}
+    \STATE \qquad remove $job$ from $R$
+    \STATE \qquad \textbf{if} $current \neq \textbf{null}$ \textbf{then} add $current$ to $R$
+    \STATE \qquad dispatch $job$ on $cpu$
+    \STATE \qquad \textbf{return} $job$
+    \STATE \quad \textbf{else}
+    \STATE \qquad \textbf{return} \textbf{null} \COMMENT{keep $current$ running}
+    \STATE \quad \textbf{end if}
+    \STATE \textbf{end procedure}
+
+  \end{algorithmic}
+\end{algorithm}

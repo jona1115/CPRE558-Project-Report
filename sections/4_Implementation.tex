@@ -1,0 +1,71 @@
+\section{Implementation}
+
+\subsection{Simulation Framework}\label{subsec:simulation-framework}
+The Simso simulation framework makes prototyping different algorithms extremely streamlined. Each scheduling algorithm is a class extending the \texttt{Scheduler} object. Several book keeping functions are required to ensure that the scheduler is implemented correctly, for example, \texttt{on\_activate()}, and \texttt{on\_terminate()}. The scheduling algorithm are implemented in the \texttt{schedule()} method.
+
+\subsection{Workload Generation}\label{subsec:workload-generation}
+For workload generation, only uniprocessor scenario is considered. We designed workload scenarios for two different application system, one with CPU usage of 97.9\%, one with CPU usage of 111.7\%, and one with CPU usage of 200.3\%.
+
+Task Set 1, shown in Table \ref{tab:98percent}, is a task set simulating a normal load condition with CPU usage of 97.9\%. The average $\frac{m}{k}$ for this task set is 0.513.
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|c|}
+        \hline
+        Task & Period (p) & WCET (c) & m & k \\
+        \hline
+        T1 & 10 & 1 & 2 & 3 \\
+        T2 & 12 & 5 & 1 & 2 \\
+        T3 & 9 & 2 & 2 & 5 \\
+        T4 & 25 & 1 & 3 & 7 \\
+        T5 & 5 & 1 & 4 & 7 \\
+        \hline
+    \end{tabular}
+    \caption{Task Set 1: 98\% CPU Usage}
+    \label{tab:98percent}
+\end{table}
+
+Task Set 2, shown in Table \ref{tab:111percent}, is a task set simulating an overloaded condition with 111.7\% CPU usage. Task 3 is designed to simulate a longer running task where (m,k)-firm requirements hold, for example, image classification task in a soft real-time system. The average $\frac{m}{k}$ for this task set is 0.499.
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|c|}
+        \hline
+        Task & Period (p) & WCET (c) & m & k \\
+        \hline
+        T1 & 10 & 1 & 2 & 3 \\
+        T2 & 12 & 3 & 1 & 2 \\
+        T3 & 9 & 6 & 2 & 5 \\
+        T4 & 20 & 2 & 3 & 7 \\
+        \hline
+    \end{tabular}
+    \caption{Task Set 1: 111\% CPU Usage}
+    \label{tab:111percent}
+\end{table}
+
+Task Set 3, shown in Table \ref{tab:200percent}, is a task set simulating an overloaded condition with 200.3\% CPU usage. Inspiration of this task set is not arbitrary. Some task, like task T6, T7, and T10 are designed to simulate long computation tasks like machine learning inference, image/video processing, FFT operations, etc. Other tasks, like T1, and T2, are designed to simulate more simple yet important computations, like sensor readings, for I/O operations, hence the higher (m,k) requirements. Other tasks are simply arbitrary filler tasks, designed to simulate helper tasks in the system. Together, all tasks in this task set add up to 200.3\% CPU usage. The average $\frac{m}{k}$ for this task set is 0.505.
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|c|}
+        \hline
+        Task & Period (p) & WCET (c) & m & k \\
+        \hline
+        T1 & 20 & 3 & 2 & 3 \\
+        T2 & 50 & 3 & 1 & 2 \\
+        T3 & 60 & 9 & 2 & 5 \\
+        T4 & 30 & 9 & 1 & 4 \\
+        T5 & 45 & 5 & 2 & 3 \\
+        T6 & 75 & 20 & 1 & 5 \\
+        T7 & 60 & 15 & 2 & 5 \\
+        T8 & 55 & 12 & 3 & 4 \\
+        T9 & 25 & 9 & 1 & 2 \\
+        T10 & 80 & 11 & 5 & 7 \\
+        \hline
+    \end{tabular}
+    \caption{Task Set 3: 200\% CPU Usage}
+    \label{tab:200percent}
+\end{table}
+
+
+Together, all three task sets are design to simulate a real life environment, where there are tasks with variable runtime, variable (m,k) requirements, and variable period and WCET. When designing all three task sets, we kept the average $\frac{m}{k}$ to be around 0.5 for all three task sets to simulate an average of 50/50 (m,k) for an entire task set. This $\frac{m}{k}$ value is chosen to model mixed-criticality workloads where half the jobs can tolerate misses on average.
